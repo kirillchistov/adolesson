@@ -14,3 +14,8 @@ data/
 # Playwright
 e2e/test-results/
 e2e/playwright-report/
+
+# Локальные настройки агентов и редакторов
+.claude/settings.local.json
+.vscode/
+.idea/
