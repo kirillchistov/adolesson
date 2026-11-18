@@ -7,7 +7,7 @@ on:
 
 jobs:
   # Формат коммитов — Conventional Commits (см. AGENTS.md).
-  # Задачи сборки и тестов добавляются вместе с каркасом frontend/backend.
+  # Задачи frontend/backend добавляются вместе с каркасом.
   commitlint:
     runs-on: ubuntu-latest
     steps:
@@ -15,3 +15,19 @@ jobs:
         with:
           fetch-depth: 0
       - uses: wagoid/commitlint-github-action@v6
+
+  prototype:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: prototype
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: prototype/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build

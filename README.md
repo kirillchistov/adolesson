@@ -15,6 +15,28 @@
 ## Прототип
 
 Кликабельный прототип этапа 0 на React с мок-данными — в [prototype/](prototype/README.md).
+`package.json` лежит там, не в корне: из корня репозитория ставят зависимости и запускают через Makefile.
+
+```bash
+make install
+make dev       # http://127.0.0.1:5173/
+```
+
+С телефона в той же сети подойдёт сетевой адрес из вывода Vite. Сборка: `make build`, просмотр собранного сайта: `make preview`.
+
+Каркас приложения, скопированный из betty-rules, — в [frontend/](frontend/README.md). Он запускается отдельно: `make -C frontend dev` на http://127.0.0.1:5174/ .
+
+## GitHub Pages
+
+Сайт статический, адреса относительные, экраны открываются через `#`. После выкладки страница доступна по ссылке:
+
+`https://<логин>.github.io/<репозиторий>/`
+
+1. Залить проект на GitHub, ветка `main`.
+2. Settings → Pages → Build and deployment → Source: **GitHub Actions**.
+3. Пуш в `main` запускает [`.github/workflows/pages.yml`](.github/workflows/pages.yml): он собирает `prototype/dist` и публикует его.
+
+Записи прототипа остаются в браузере устройства, это не общая база.
 
 ## Для разработчиков и агентов
 

@@ -10,11 +10,10 @@
 
 ## Состояние проекта
 
-В репозитории документы и кликабельный прототип этапа 0 в `prototype/`.
-Каркаса `frontend/` и сервера ещё нет: они появляются по
-[дорожной карте](docs/project-roadmap.md). Каркас переносится из
-[betty-rules](https://github.com/kirillchistov/betty-rules) по плану §9.4 концепции.
-Разделы ниже про контракт, запуск `frontend/` и проверки вступают в силу вместе
+В репозитории документы, кликабельный прототип этапа 0 в `prototype/` и каркас
+`frontend/` (раздел «Моё» из betty-rules). Сервера ещё нет: он появляется по
+[дорожной карте](docs/project-roadmap.md).
+Разделы ниже про контракт и проверки backend/e2e вступают в силу вместе
 с соответствующим кодом; до этого их не нужно имитировать заглушками.
 
 ## Подход: Design First
@@ -102,23 +101,24 @@ docs: add sleep and stress sources to registry
 
 ## Запуск приложения локально
 
-Прототип этапа 0, пока нет каркаса `frontend/`:
+Прототип этапа 0. `package.json` лежит в `prototype/`, из корня репозитория:
 
 ```bash
-cd prototype && npm install && npm run dev   # UI на http://localhost:5173
+make install && make dev   # прототип на http://127.0.0.1:5173
 ```
 
-Ориентир после появления каркаса (как в betty-rules и project-387):
+Каркас `frontend/` (раздел «Моё», коммит betty-rules зафиксирован в [frontend/README.md](frontend/README.md)):
 
 ```bash
-cd frontend && npm install && npm run dev   # UI на http://localhost:5173
+cd frontend && npm install && npm run dev   # UI на http://127.0.0.1:5174
 ```
 
 ## Проверки перед коммитом
 
 Для кода (по мере появления):
 
-- `cd frontend && npm run lint && npm run build` — линт (oxlint) и типы;
+- `make lint && make build` — линт (oxlint) и сборка прототипа;
+- `cd frontend && npm run build` — типы и сборка каркаса;
 - `cd frontend && npm run test:ct` — компонентные тесты (Playwright CT);
 - `cd backend && npm test` — правила API, в том числе доступ к общему столу
   только участникам семьи;
