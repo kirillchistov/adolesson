@@ -4,13 +4,16 @@
 [app-concept.md §10](../docs/app-concept.md). Мок-данные, без сервера; обе роли живут в одном браузере
 (`localStorage`). Откройте две вкладки — подростка и родителя, — и общий стол будет обновляться между ними.
 
+`package.json` лежит в этой папке. Из корня репозитория:
+
 ```bash
-cd prototype
-npm install
-npm run dev      # http://localhost:5173, с телефона — сетевой адрес из вывода Vite
-npm run lint     # oxlint
-npm run build    # проверка типов и сборка в dist/
+make install
+make dev         # http://127.0.0.1:5173, с телефона — сетевой адрес из вывода Vite
+make lint        # oxlint
+make build       # проверка типов и сборка в prototype/dist/
 ```
+
+Те же скрипты из этой папки: `npm install`, `npm run dev`, `npm run lint`, `npm run build`.
 
 ## Экраны
 
