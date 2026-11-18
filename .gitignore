@@ -1,0 +1,16 @@
+node_modules/
+tsp-output/
+.env
+.env.*
+!.env.example
+dist/
+*.log
+.DS_Store
+
+data/
+*.sqlite
+*.sqlite-journal
+
+# Playwright
+e2e/test-results/
+e2e/playwright-report/
