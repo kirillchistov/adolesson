@@ -26,6 +26,8 @@ make dev       # http://127.0.0.1:5173/
 
 Каркас приложения, скопированный из betty-rules, — в [frontend/](frontend/README.md). Он запускается отдельно: `make -C frontend dev` на http://127.0.0.1:5174/ .
 
+Контракт общего стола — TypeSpec в `spec/`. Из корня: `npm install && npm run spec:build` (или `make spec`). Собранный файл `docs/api/openapi.yaml` руками не правят. Типы клиента: `cd frontend && npm run api:types`.
+
 ## GitHub Pages
 
 Сайт статический, адреса относительные, экраны открываются через `#`. После выкладки страница доступна по ссылке:

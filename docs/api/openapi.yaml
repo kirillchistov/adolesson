@@ -1,0 +1,1232 @@
+openapi: 3.0.0
+info:
+  title: Общий стол
+  version: 0.1.0
+  description: |-
+    Общий стол семьи.
+
+    Контракт (Design First): эти `.tsp` — источник истины. Из них собирается
+    `docs/api/openapi.yaml`. Личный слой подростка (чек-ины, журнал, блоки,
+    самодиагностика, «Моё») в API нет и не добавляется: сервер такие тела не принимает.
+    Светофор хранит только цвет, без слов из чек-ина.
+tags:
+  - name: Session
+  - name: Family
+  - name: Invitations
+  - name: Members
+  - name: Agreements
+  - name: Signals
+  - name: Help requests
+  - name: Parent notes
+paths:
+  /api/agreements/current:
+    get:
+      operationId: AgreementRoutes_get
+      description: Текущая договорённость семьи. 404 — ещё не начинали.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agreement'
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+      tags:
+        - Agreements
+      security:
+        - ApiKeyAuth: []
+    put:
+      operationId: AgreementRoutes_save
+      description: |-
+        Создать или заменить черновик. Может любой участник.
+        Принятия сбрасываются: после правки оба подтверждают заново.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agreement'
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+      tags:
+        - Agreements
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgreementWrite'
+      security:
+        - ApiKeyAuth: []
+  /api/agreements/current/accept:
+    post:
+      operationId: AgreementRoutes_accept
+      description: |-
+        Текущий участник принимает договорённость.
+        Повторное нажатие ничего не меняет.
+        Статус становится active, когда среди принявших есть подросток и родитель.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agreement'
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+      tags:
+        - Agreements
+      security:
+        - ApiKeyAuth: []
+  /api/families:
+    post:
+      operationId: FamilyRoutes_create
+      description: |-
+        Родитель создаёт семью и сразу становится её участником.
+        409 — логин уже занят.
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+        '409':
+          description: The request conflicts with the current state of the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConflictError'
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+      tags:
+        - Family
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FamilyCreate'
+  /api/help-requests:
+    get:
+      operationId: HelpRequestRoutes_list
+      description: Просьбы семьи. Содержимого личного журнала здесь нет.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HelpRequest'
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+      tags:
+        - Help requests
+      security:
+        - ApiKeyAuth: []
+    post:
+      operationId: HelpRequestRoutes_create
+      description: Автор — текущий участник. На стол попадает уже просмотренный им текст.
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HelpRequest'
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+      tags:
+        - Help requests
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HelpRequestCreate'
+      security:
+        - ApiKeyAuth: []
+  /api/help-requests/{id}:
+    patch:
+      operationId: HelpRequestRoutes_update
+      description: |-
+        Ответ родителя: вижу, договорились о времени, готово.
+        Подросток статус чужой или своей просьбы через этот метод не меняет.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HelpRequest'
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '403':
+          description: Access is forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenError'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+      tags:
+        - Help requests
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HelpRequestUpdate'
+      security:
+        - ApiKeyAuth: []
+  /api/invitations:
+    post:
+      operationId: InvitationRoutes_create
+      description: |-
+        Родитель приглашает второго взрослого или подростка.
+        Один и тот же механизм, роль задаётся в теле. Подросток приглашение не создаёт.
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invitation'
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '403':
+          description: Access is forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenError'
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+      tags:
+        - Invitations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvitationCreate'
+      security:
+        - ApiKeyAuth: []
+  /api/invitations/{token}:
+    get:
+      operationId: InvitationRoutes_preview
+      description: Превью приглашения до регистрации. Сессия не нужна.
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitationPreview'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+      tags:
+        - Invitations
+  /api/invitations/{token}/accept:
+    post:
+      operationId: InvitationRoutes_accept
+      description: |-
+        Принять приглашение: свой логин и секрет, своя сессия.
+        404 — токен неизвестен, просрочен или уже использован.
+        409 — логин занят.
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+        '409':
+          description: The request conflicts with the current state of the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConflictError'
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+      tags:
+        - Invitations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvitationAccept'
+  /api/members:
+    get:
+      operationId: MemberRoutes_list
+      description: 'Участники своей семьи: имя и роль, без секретов.'
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Member'
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+      tags:
+        - Members
+      security:
+        - ApiKeyAuth: []
+  /api/members/me:
+    patch:
+      operationId: MemberRoutes_updateMe
+      description: Своё имя и форма рода. Роль приглашением не меняется.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Member'
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+      tags:
+        - Members
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MemberUpdate'
+      security:
+        - ApiKeyAuth: []
+  /api/notes:
+    get:
+      operationId: ParentNoteRoutes_list
+      description: |-
+        Заметки, которые видит текущий родитель: свои и чужие с visibility `parents`.
+        Подростку — 403. Заметок подростка этот ресурс не хранит.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ParentNote'
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '403':
+          description: Access is forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenError'
+      tags:
+        - Parent notes
+      security:
+        - ApiKeyAuth: []
+    post:
+      operationId: ParentNoteRoutes_create
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParentNote'
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '403':
+          description: Access is forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenError'
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+      tags:
+        - Parent notes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParentNoteWrite'
+      security:
+        - ApiKeyAuth: []
+  /api/notes/{id}:
+    patch:
+      operationId: ParentNoteRoutes_update
+      description: Правит только автор. Чужая или невидимая заметка — 404.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParentNote'
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '403':
+          description: Access is forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenError'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+      tags:
+        - Parent notes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParentNoteWrite'
+      security:
+        - ApiKeyAuth: []
+    delete:
+      operationId: ParentNoteRoutes_remove
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '403':
+          description: Access is forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenError'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+      tags:
+        - Parent notes
+      security:
+        - ApiKeyAuth: []
+  /api/session:
+    post:
+      operationId: SessionRoutes_login
+      description: Вход по логину и секрету. Ставит cookie `session`.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+      tags:
+        - Session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionCreate'
+    get:
+      operationId: SessionRoutes_current
+      description: Кто сейчас вошёл.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+      tags:
+        - Session
+      security:
+        - ApiKeyAuth: []
+    delete:
+      operationId: SessionRoutes_logout
+      description: Выход. Снимает cookie.
+      parameters: []
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+      tags:
+        - Session
+      security:
+        - ApiKeyAuth: []
+  /api/signals:
+    get:
+      operationId: SignalRoutes_list
+      description: По одному текущему цвету на участника. Истории цветов нет.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Signal'
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+      tags:
+        - Signals
+      security:
+        - ApiKeyAuth: []
+  /api/signals/me:
+    put:
+      operationId: SignalRoutes_putMine
+      description: Поставить свой цвет. Предыдущий свой цвет заменяется.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Signal'
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+      tags:
+        - Signals
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignalWrite'
+      security:
+        - ApiKeyAuth: []
+components:
+  schemas:
+    Agreement:
+      type: object
+      required:
+        - id
+        - status
+        - weekStart
+        - priority
+        - result
+        - schedule
+        - minOnHardDay
+        - parentHelp
+        - howToSayStuck
+        - parentsDont
+        - reviewAt
+        - acceptedBy
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/AgreementStatus'
+        weekStart:
+          type: string
+          format: date
+        priority:
+          type: string
+          maxLength: 500
+        result:
+          type: string
+          maxLength: 500
+        schedule:
+          type: string
+          maxLength: 500
+        minOnHardDay:
+          type: string
+          maxLength: 500
+        parentHelp:
+          type: string
+          maxLength: 500
+        howToSayStuck:
+          type: string
+          maxLength: 500
+        parentsDont:
+          type: string
+          minLength: 1
+          maxLength: 500
+        reviewAt:
+          type: string
+          format: date-time
+        acceptedBy:
+          type: array
+          items:
+            type: string
+          description: Идентификаторы участников, которые нажали «согласен».
+      description: |-
+        Договорённость недели. Поле «чего родители не делают» обязательно.
+        Черновик может начать любой участник. В силу вступает, когда приняли
+        подросток и хотя бы один родитель.
+    AgreementStatus:
+      type: string
+      enum:
+        - draft
+        - active
+    AgreementWrite:
+      type: object
+      required:
+        - weekStart
+        - priority
+        - result
+        - schedule
+        - minOnHardDay
+        - parentHelp
+        - howToSayStuck
+        - parentsDont
+        - reviewAt
+      properties:
+        weekStart:
+          type: string
+          format: date
+        priority:
+          type: string
+          maxLength: 500
+        result:
+          type: string
+          maxLength: 500
+        schedule:
+          type: string
+          maxLength: 500
+        minOnHardDay:
+          type: string
+          maxLength: 500
+        parentHelp:
+          type: string
+          maxLength: 500
+        howToSayStuck:
+          type: string
+          maxLength: 500
+        parentsDont:
+          type: string
+          minLength: 1
+          maxLength: 500
+        reviewAt:
+          type: string
+          format: date-time
+    ConflictError:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          enum:
+            - conflict
+        message:
+          type: string
+    Family:
+      type: object
+      required:
+        - id
+        - name
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 1
+          maxLength: 80
+        createdAt:
+          type: string
+          format: date-time
+      description: Семья. Создаёт родитель.
+    FamilyCreate:
+      type: object
+      required:
+        - name
+        - displayName
+        - pronouns
+        - login
+        - secret
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 80
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 80
+        pronouns:
+          $ref: '#/components/schemas/Pronouns'
+        login:
+          allOf:
+            - $ref: '#/components/schemas/Login'
+          pattern: ^[a-z0-9]([a-z0-9-]{0,30}[a-z0-9])?$
+          description: Логин для входа. Латиница, цифры и дефис, 2–32 символа.
+        secret:
+          type: string
+          minLength: 4
+          maxLength: 64
+          description: Пароль или PIN. На сервере хранится только в виде секрета, в ответах нет.
+    FieldError:
+      type: object
+      required:
+        - field
+        - message
+      properties:
+        field:
+          type: string
+        message:
+          type: string
+    ForbiddenError:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          enum:
+            - forbidden
+        message:
+          type: string
+    HelpKind:
+      type: string
+      enum:
+        - understand
+        - signs
+        - sit
+        - start
+        - big
+        - own
+    HelpRequest:
+      type: object
+      required:
+        - id
+        - fromId
+        - kind
+        - text
+        - status
+        - at
+      properties:
+        id:
+          type: string
+          format: uuid
+        fromId:
+          type: string
+          format: uuid
+        kind:
+          $ref: '#/components/schemas/HelpKind'
+        text:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        status:
+          $ref: '#/components/schemas/HelpStatus'
+        reply:
+          type: string
+          maxLength: 500
+        at:
+          type: string
+          format: date-time
+    HelpRequestCreate:
+      type: object
+      required:
+        - kind
+        - text
+      properties:
+        kind:
+          $ref: '#/components/schemas/HelpKind'
+        text:
+          type: string
+          minLength: 1
+          maxLength: 1000
+    HelpRequestUpdate:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          $ref: '#/components/schemas/HelpStatus'
+        reply:
+          type: string
+          maxLength: 500
+    HelpStatus:
+      type: string
+      enum:
+        - sent
+        - seen
+        - scheduled
+        - done
+      description: Просьба на общем столе. «Давай завтра» — это ответ в reply, статус seen или scheduled.
+    Invitation:
+      type: object
+      required:
+        - token
+        - role
+        - expiresAt
+      properties:
+        token:
+          type: string
+        role:
+          $ref: '#/components/schemas/Role'
+        expiresAt:
+          type: string
+          format: date-time
+      description: Приглашение по ссылке. Токен показывается создателю один раз.
+    InvitationAccept:
+      type: object
+      required:
+        - displayName
+        - pronouns
+        - login
+        - secret
+      properties:
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 80
+        pronouns:
+          $ref: '#/components/schemas/Pronouns'
+        login:
+          allOf:
+            - $ref: '#/components/schemas/Login'
+          pattern: ^[a-z0-9]([a-z0-9-]{0,30}[a-z0-9])?$
+        secret:
+          type: string
+          minLength: 4
+          maxLength: 64
+    InvitationCreate:
+      type: object
+      required:
+        - role
+      properties:
+        role:
+          $ref: '#/components/schemas/Role'
+    InvitationPreview:
+      type: object
+      required:
+        - familyName
+        - role
+        - expiresAt
+      properties:
+        familyName:
+          type: string
+        role:
+          $ref: '#/components/schemas/Role'
+        expiresAt:
+          type: string
+          format: date-time
+      description: То, что можно показать до принятия приглашения, без секретов семьи.
+    Login:
+      type: string
+    Member:
+      type: object
+      required:
+        - id
+        - role
+        - displayName
+        - pronouns
+      properties:
+        id:
+          type: string
+          format: uuid
+        role:
+          $ref: '#/components/schemas/Role'
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 80
+        pronouns:
+          $ref: '#/components/schemas/Pronouns'
+      description: Участник семьи. Пароль и PIN в ответах не возвращаются.
+    MemberUpdate:
+      type: object
+      properties:
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 80
+        pronouns:
+          $ref: '#/components/schemas/Pronouns'
+    NotFoundError:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          enum:
+            - not_found
+        message:
+          type: string
+    NoteKind:
+      type: string
+      enum:
+        - observation
+        - reaction
+        - school
+    NoteVisibility:
+      type: string
+      enum:
+        - self
+        - parents
+    ParentNote:
+      type: object
+      required:
+        - id
+        - authorId
+        - visibility
+        - kind
+        - text
+        - at
+      properties:
+        id:
+          type: string
+          format: uuid
+        authorId:
+          type: string
+          format: uuid
+        visibility:
+          $ref: '#/components/schemas/NoteVisibility'
+        kind:
+          $ref: '#/components/schemas/NoteKind'
+        text:
+          type: string
+          minLength: 1
+          maxLength: 4000
+        at:
+          type: string
+          format: date-time
+      description: |-
+        Личная заметка родителя. Подросток эти записи не читает.
+        visibility `parents` открывает заметку другим родителям семьи, не подростку.
+    ParentNoteWrite:
+      type: object
+      required:
+        - visibility
+        - kind
+        - text
+      properties:
+        visibility:
+          $ref: '#/components/schemas/NoteVisibility'
+        kind:
+          $ref: '#/components/schemas/NoteKind'
+        text:
+          type: string
+          minLength: 1
+          maxLength: 4000
+    Pronouns:
+      type: string
+      enum:
+        - f
+        - m
+        - neutral
+    Role:
+      type: string
+      enum:
+        - parent
+        - teen
+    Session:
+      type: object
+      required:
+        - member
+        - family
+      properties:
+        member:
+          $ref: '#/components/schemas/Member'
+        family:
+          $ref: '#/components/schemas/Family'
+      description: Текущая сессия. Cookie `session` выставляет сервер.
+    SessionCreate:
+      type: object
+      required:
+        - login
+        - secret
+      properties:
+        login:
+          allOf:
+            - $ref: '#/components/schemas/Login'
+          pattern: ^[a-z0-9]([a-z0-9-]{0,30}[a-z0-9])?$
+        secret:
+          type: string
+          minLength: 1
+          maxLength: 64
+    Signal:
+      type: object
+      required:
+        - id
+        - memberId
+        - color
+        - at
+      properties:
+        id:
+          type: string
+          format: uuid
+        memberId:
+          type: string
+          format: uuid
+        color:
+          $ref: '#/components/schemas/SignalColor'
+        at:
+          type: string
+          format: date-time
+      description: Текущий цвет участника. Слов чек-ина здесь нет.
+    SignalColor:
+      type: string
+      enum:
+        - green
+        - yellow
+        - red
+    SignalWrite:
+      type: object
+      required:
+        - color
+      properties:
+        color:
+          $ref: '#/components/schemas/SignalColor'
+    UnauthorizedError:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          enum:
+            - unauthorized
+        message:
+          type: string
+    ValidationError:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          enum:
+            - validation_error
+        message:
+          type: string
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldError'
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: cookie
+      name: session
+servers:
+  - url: http://localhost:5001
+    description: Локальный сервер разработки
+    variables: {}

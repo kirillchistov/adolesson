@@ -7,7 +7,6 @@ on:
 
 jobs:
   # Формат коммитов — Conventional Commits (см. AGENTS.md).
-  # Задачи frontend/backend добавляются вместе с каркасом.
   commitlint:
     runs-on: ubuntu-latest
     steps:
@@ -15,6 +14,21 @@ jobs:
         with:
           fetch-depth: 0
       - uses: wagoid/commitlint-github-action@v6
+
+  # Контракт — источник истины: openapi.yaml собран из spec/ и не правился руками.
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm ci
+      - run: npm run spec:build
+      - name: Contract is up to date
+        run: git diff --exit-code docs/api/openapi.yaml
 
   prototype:
     runs-on: ubuntu-latest

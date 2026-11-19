@@ -3,16 +3,17 @@
 # package.json лежит в prototype/, не в корне репозитория.
 PROTO := prototype
 
-.PHONY: help install dev lint build preview clean
+.PHONY: help install dev lint build preview clean spec
 
 help:
-	@echo "Команды из корня репозитория. Зависимости и скрипты — в $(PROTO)/."
+	@echo "Прототип — в $(PROTO)/. Контракт общего стола — npm-пакет в корне."
 	@echo "make install   поставить зависимости прототипа"
 	@echo "make dev       локальный сервер, в том числе по сети"
 	@echo "make lint      oxlint"
 	@echo "make build     проверка типов и сборка в $(PROTO)/dist/"
 	@echo "make preview   собрать и открыть dist/"
 	@echo "make clean     удалить $(PROTO)/dist/"
+	@echo "make spec      пересобрать docs/api/openapi.yaml из spec/"
 	@echo "make -C frontend dev   каркас «Моё», http://127.0.0.1:5174/"
 
 install:
@@ -32,3 +33,6 @@ preview: build
 
 clean:
 	rm -rf $(PROTO)/dist
+
+spec:
+	npm run spec:build

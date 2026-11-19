@@ -6,9 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "preview": "vite preview --host"
+    "preview": "vite preview --host",
+    "api:types": "openapi-typescript ../docs/api/openapi.yaml -o src/api/schema.d.ts"
   },
   "dependencies": {
+    "openapi-fetch": "^0.17.0",
     "@fontsource/manrope": "^5.2.6",
     "@fontsource/pangolin": "^5.2.6",
     "@fontsource/unbounded": "^5.2.6",
@@ -17,6 +19,7 @@
     "react-dom": "^19.1.0"
   },
   "devDependencies": {
+    "openapi-typescript": "^7.13.0",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
     "@vitejs/plugin-react": "^4.5.0",
