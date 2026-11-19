@@ -157,6 +157,32 @@ namespace HelpRequestRoutes {
   op update(@path id: string, @body body: HelpRequestUpdate): HelpRequest | UnauthorizedError | ForbiddenError | NotFoundError | ValidationError;
 }
 
+@tag("Table notes")
+@route("/api/table-notes")
+namespace TableNoteRoutes {
+  /** Фразы, которые участники сами положили на стол. Личной карты здесь нет. */
+  @useAuth(SessionAuth)
+  @get
+  op list(): TableNote[] | UnauthorizedError;
+
+  /**
+   * Заменить свою фразу этого вида.
+   * barrier и factor принимает только подросток, seen — только родитель.
+   */
+  @useAuth(SessionAuth)
+  @put
+  @route("/me")
+  op putMine(@body body: TableNoteWrite): TableNote | UnauthorizedError | ForbiddenError | ValidationError;
+
+  /** Убрать свою фразу. Чужую не видно: 404. */
+  @useAuth(SessionAuth)
+  @delete
+  @route("/me/{kind}")
+  op remove(@path kind: TableNoteKind): {
+    @statusCode statusCode: 204;
+  } | UnauthorizedError | ForbiddenError | NotFoundError;
+}
+
 @tag("Parent notes")
 @route("/api/notes")
 namespace ParentNoteRoutes {

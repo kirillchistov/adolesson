@@ -31,6 +31,14 @@ export function Week() {
         <p>{week.criterion}</p>
       </article>
       <div className="choices">
+        <a className="choice" href="#/parent/seen">
+          <strong>Что вижу</strong>
+          <span>Один случай и одна фраза на стол, если сами её положите</span>
+        </a>
+        <a className="choice" href="#/parent/help">
+          <strong>Когда нужна помощь раньше</strong>
+          <span>Не диагноз. Маршрут, если состояние хуже или есть риск</span>
+        </a>
         <a className="choice" href="#/parent/talk">
           <strong>Перед разговором</strong>
           <span>Проверить себя за минуту</span>

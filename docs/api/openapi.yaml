@@ -17,6 +17,7 @@ tags:
   - name: Agreements
   - name: Signals
   - name: Help requests
+  - name: Table notes
   - name: Parent notes
 paths:
   /api/agreements/current:
@@ -710,6 +711,107 @@ paths:
               $ref: '#/components/schemas/SignalWrite'
       security:
         - ApiKeyAuth: []
+  /api/table-notes:
+    get:
+      operationId: TableNoteRoutes_list
+      description: Фразы, которые участники сами положили на стол. Личной карты здесь нет.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TableNote'
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+      tags:
+        - Table notes
+      security:
+        - ApiKeyAuth: []
+  /api/table-notes/me:
+    put:
+      operationId: TableNoteRoutes_putMine
+      description: |-
+        Заменить свою фразу этого вида.
+        barrier и factor принимает только подросток, seen — только родитель.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TableNote'
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '403':
+          description: Access is forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenError'
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+      tags:
+        - Table notes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TableNoteWrite'
+      security:
+        - ApiKeyAuth: []
+  /api/table-notes/me/{kind}:
+    delete:
+      operationId: TableNoteRoutes_remove
+      description: 'Убрать свою фразу. Чужую не видно: 404.'
+      parameters:
+        - name: kind
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/TableNoteKind'
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '403':
+          description: Access is forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenError'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+      tags:
+        - Table notes
+      security:
+        - ApiKeyAuth: []
 components:
   schemas:
     Agreement:
@@ -1193,6 +1295,52 @@ components:
       properties:
         color:
           $ref: '#/components/schemas/SignalColor'
+    TableNote:
+      type: object
+      required:
+        - id
+        - authorId
+        - kind
+        - text
+        - at
+      properties:
+        id:
+          type: string
+          format: uuid
+        authorId:
+          type: string
+          format: uuid
+        kind:
+          $ref: '#/components/schemas/TableNoteKind'
+        text:
+          type: string
+          minLength: 1
+          maxLength: 500
+        at:
+          type: string
+          format: date-time
+    TableNoteKind:
+      type: string
+      enum:
+        - barrier
+        - factor
+        - seen
+      description: |-
+        Короткая фраза, которую автор сам положил на стол.
+        barrier и factor — подросток, seen — родитель.
+        Баллов карты и ответов опросника здесь нет.
+    TableNoteWrite:
+      type: object
+      required:
+        - kind
+        - text
+      properties:
+        kind:
+          $ref: '#/components/schemas/TableNoteKind'
+        text:
+          type: string
+          minLength: 1
+          maxLength: 500
     UnauthorizedError:
       type: object
       required:

@@ -51,6 +51,17 @@ enum NoteKind {
   school,
 }
 
+/**
+ * Короткая фраза, которую автор сам положил на стол.
+ * barrier и factor — подросток, seen — родитель.
+ * Баллов карты и ответов опросника здесь нет.
+ */
+enum TableNoteKind {
+  barrier,
+  factor,
+  seen,
+}
+
 enum AgreementStatus {
   /** Черновик: текст можно менять, принятия сброшены */
   draft,
@@ -303,6 +314,30 @@ model ParentNote {
   text: string;
 
   at: utcDateTime;
+}
+
+model TableNote {
+  @format("uuid")
+  id: string;
+
+  @format("uuid")
+  authorId: string;
+
+  kind: TableNoteKind;
+
+  @minLength(1)
+  @maxLength(500)
+  text: string;
+
+  at: utcDateTime;
+}
+
+model TableNoteWrite {
+  kind: TableNoteKind;
+
+  @minLength(1)
+  @maxLength(500)
+  text: string;
 }
 
 model ParentNoteWrite {

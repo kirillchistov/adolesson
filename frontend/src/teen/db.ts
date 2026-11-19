@@ -1,4 +1,5 @@
 import Dexie, { type Table } from 'dexie'
+import type { PointId } from './content/map'
 
 // Личный слой подростка. База живёт только в этом браузере: синхронизации нет.
 export type Color = 'green' | 'yellow' | 'red'
@@ -36,11 +37,21 @@ export type CardRecord = {
 
 const emptyCard: CardRecord = { id: 'card', adult: '', backupAdult: '', phrase: '' }
 
+export type BarrierRecord = {
+  id: 'barrier'
+  scores: Record<PointId, number>
+  sleep: string
+  energy: string
+  fear: string
+  goodWeek: string
+}
+
 class TeenDB extends Dexie {
   checkIns!: Table<CheckIn, string>
   blocks!: Table<BlockRecord, string>
   helpNotes!: Table<HelpNote, string>
   card!: Table<CardRecord, string>
+  maps!: Table<BarrierRecord, string>
 
   constructor() {
     super('adolesson-teen')
@@ -50,6 +61,7 @@ class TeenDB extends Dexie {
       helpNotes: 'id, at',
       card: 'id',
     })
+    this.version(2).stores({ maps: 'id' })
   }
 }
 
@@ -58,6 +70,22 @@ export const teenDb = new TeenDB()
 export const readCheckIns = () => teenDb.checkIns.orderBy('at').reverse().toArray()
 export const readHelpNotes = () => teenDb.helpNotes.orderBy('at').reverse().toArray()
 export const readCard = async () => (await teenDb.card.get('card')) ?? emptyCard
+
+export async function readBarrier() {
+  return (await teenDb.maps.get('barrier')) ?? null
+}
+
+export async function saveBarrier(record: Omit<BarrierRecord, 'id'> & Partial<Pick<BarrierRecord, 'id'>>) {
+  const current = (await readBarrier()) ?? {
+    id: 'barrier' as const,
+    scores: { start: 0, understand: 0, continue: 0, submit: 0, recover: 0 },
+    sleep: '',
+    energy: '',
+    fear: '',
+    goodWeek: '',
+  }
+  await teenDb.maps.put({ ...current, ...record, id: 'barrier' })
+}
 
 export function isToday(iso: string) {
   const date = new Date(iso)

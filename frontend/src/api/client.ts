@@ -24,3 +24,5 @@ export type AgreementWrite = components['schemas']['AgreementWrite'];
 export type Signal = components['schemas']['Signal'];
 export type HelpRequest = components['schemas']['HelpRequest'];
 export type ParentNote = components['schemas']['ParentNote'];
+export type TableNote = components['schemas']['TableNote'];
+export type TableNoteKind = components['schemas']['TableNoteKind'];

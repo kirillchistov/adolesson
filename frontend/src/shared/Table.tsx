@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { api, type Agreement, type AgreementWrite, type HelpRequest } from '../api/client'
+import { api, type Agreement, type AgreementWrite, type HelpRequest, type TableNote } from '../api/client'
 import { apiMessage, useSession } from '../api/session'
 import { colors } from '../teen/content/teen'
 import type { Color } from '../teen/db'
@@ -144,6 +144,7 @@ function TableBody({ data, reload }: { data: TableData; reload: () => Promise<vo
     <>
       <Signals data={data} role={me.role} reload={reload} />
       <AgreementBlock data={data} reload={reload} />
+      <Notes data={data} mine={me.id} reload={reload} />
       <Requests data={data} role={me.role} reload={reload} />
     </>
   )
@@ -350,6 +351,47 @@ function Row({ label, value }: { label: string; value: string }) {
       <dt>{label}</dt>
       <dd>{value}</dd>
     </div>
+  )
+}
+
+const noteLabel: Record<TableNote['kind'], string> = {
+  barrier: 'Барьер',
+  factor: 'Что помогает',
+  seen: 'Что вижу',
+}
+
+function Notes({ data, mine, reload }: { data: TableData; mine: string; reload: () => Promise<void> }) {
+  const [error, setError] = useState('')
+
+  async function remove(kind: TableNote['kind']) {
+    const result = await api.DELETE('/api/table-notes/me/{kind}', { params: { path: { kind } } })
+    if (!result.response.ok) {
+      setError(apiMessage(result.error, 'Фраза не убралась'))
+      return
+    }
+    await reload()
+  }
+
+  return (
+    <section className="stack">
+      <h2>Фразы на столе</h2>
+      <p className="quiet">Только то, что автор сам сюда положил. Баллов карты здесь нет.</p>
+      {data.notes.length === 0 ? <p className="quiet">Пока фраз нет.</p> : null}
+      {data.notes.map((note) => (
+        <article key={note.id} className="feed-item">
+          <p>
+            {memberName(data.members, note.authorId)} · {noteLabel[note.kind]}
+          </p>
+          <p>«{note.text}»</p>
+          {note.authorId === mine ? (
+            <button type="button" className="text-btn" onClick={() => void remove(note.kind)}>
+              Убрать свою
+            </button>
+          ) : null}
+        </article>
+      ))}
+      {error ? <p className="quiet">{error}</p> : null}
+    </section>
   )
 }
 

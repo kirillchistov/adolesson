@@ -231,6 +231,52 @@ export async function buildApp({ logger = false, database } = {}) {
     },
   );
 
+  const teenNoteKinds = new Set(['barrier', 'factor']);
+  const parentNoteKinds = new Set(['seen']);
+
+  function noteAllowed(role, kind) {
+    return role === 'teen' ? teenNoteKinds.has(kind) : parentNoteKinds.has(kind);
+  }
+
+  app.get('/api/table-notes', { preHandler: requireMember }, async (request) =>
+    store.listTableNotes(request.session.family.id),
+  );
+
+  app.put(
+    '/api/table-notes/me',
+    { schema: { body: ref('TableNoteWrite') }, preHandler: requireMember },
+    async (request, reply) => {
+      const { kind, text } = request.body;
+      if (!noteAllowed(request.session.member.role, kind)) {
+        return forbidden(reply, 'Эту фразу на стол кладёт другая роль');
+      }
+      return store.putTableNote(
+        request.session.family.id,
+        request.session.member.id,
+        kind,
+        text,
+      );
+    },
+  );
+
+  app.delete(
+    '/api/table-notes/me/:kind',
+    { preHandler: requireMember },
+    async (request, reply) => {
+      const { kind } = request.params;
+      if (!noteAllowed(request.session.member.role, kind)) {
+        return forbidden(reply, 'Эту фразу на стол кладёт другая роль');
+      }
+      const removed = await store.deleteTableNote(
+        request.session.family.id,
+        request.session.member.id,
+        kind,
+      );
+      if (!removed) return notFound(reply, 'Фразы на столе нет');
+      return reply.code(204).send();
+    },
+  );
+
   app.get('/api/notes', { preHandler: requireMember }, async (request, reply) => {
     if (request.session.member.role !== 'parent') {
       return forbidden(reply, 'Заметки родителя подростку не показываются');

@@ -385,6 +385,50 @@ export function createStore(db) {
       return updated.rows[0] ? helpView(updated.rows[0]) : null;
     },
 
+    async listTableNotes(familyId) {
+      const found = await db.query(
+        `SELECT id, author_id, kind, text, at FROM table_notes
+         WHERE family_id = $1 ORDER BY at, kind, author_id`,
+        [familyId],
+      );
+      return found.rows.map(tableNoteView);
+    },
+
+    async putTableNote(familyId, authorId, kind, text) {
+      const now = new Date().toISOString();
+      const existing = await db.query(
+        'SELECT id FROM table_notes WHERE author_id = $1 AND kind = $2',
+        [authorId, kind],
+      );
+      if (existing.rows[0]) {
+        await db.query(
+          'UPDATE table_notes SET text = $3, at = $4 WHERE author_id = $1 AND kind = $2',
+          [authorId, kind, text, now],
+        );
+      } else {
+        await db.query(
+          `INSERT INTO table_notes (id, family_id, author_id, kind, text, at)
+           VALUES ($1, $2, $3, $4, $5, $6)`,
+          [crypto.randomUUID(), familyId, authorId, kind, text, now],
+        );
+      }
+      const found = await db.query(
+        'SELECT id, author_id, kind, text, at FROM table_notes WHERE author_id = $1 AND kind = $2',
+        [authorId, kind],
+      );
+      return tableNoteView(found.rows[0]);
+    },
+
+    async deleteTableNote(familyId, authorId, kind) {
+      const removed = await db.query(
+        `DELETE FROM table_notes
+         WHERE family_id = $1 AND author_id = $2 AND kind = $3
+         RETURNING id`,
+        [familyId, authorId, kind],
+      );
+      return removed.rows.length > 0;
+    },
+
     async listNotes(familyId, authorId) {
       const found = await db.query(
         `SELECT id, author_id, visibility, kind, text, at FROM parent_notes
@@ -456,6 +500,16 @@ function helpView(row) {
   };
   if (row.reply != null) view.reply = row.reply;
   return view;
+}
+
+function tableNoteView(row) {
+  return {
+    id: String(row.id),
+    authorId: String(row.author_id),
+    kind: row.kind,
+    text: row.text,
+    at: iso(row.at),
+  };
 }
 
 function noteView(row) {

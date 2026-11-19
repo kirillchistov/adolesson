@@ -3,10 +3,12 @@ import { Table } from '../shared/Table'
 import { Pause } from './pause/Pause'
 import { Phrases } from './phrases/Phrases'
 import { Talk } from './talk/Talk'
+import { HelpRoute } from './help/Help'
+import { Seen } from './seen/Seen'
 import { Week } from './week/Week'
 
 const tabs = [
-  { href: '#/parent/week', label: 'Неделя', names: ['week', 'talk'] },
+  { href: '#/parent/week', label: 'Неделя', names: ['week', 'talk', 'seen', 'help'] },
   { href: '#/parent/table', label: 'Стол', names: ['table'] },
   { href: '#/parent/phrases', label: 'Фразы', names: ['phrases'] },
   { href: '#/parent/pause', label: 'Пауза', names: ['pause'] },
@@ -14,7 +16,7 @@ const tabs = [
 
 export function ParentApp({ path }: { path: string }) {
   const name = path.replace(/^\/parent\/?/, '').split('?')[0] || 'week'
-  const known = ['week', 'talk', 'pause', 'phrases', 'table'].includes(name)
+  const known = ['week', 'talk', 'pause', 'phrases', 'table', 'seen', 'help'].includes(name)
 
   useEffect(() => {
     if (!known) location.replace('#/parent/week')
@@ -31,6 +33,8 @@ export function ParentApp({ path }: { path: string }) {
         {name === 'pause' ? <Pause /> : null}
         {name === 'phrases' ? <Phrases /> : null}
         {name === 'table' ? <Table allowCreate /> : null}
+        {name === 'seen' ? <Seen /> : null}
+        {name === 'help' ? <HelpRoute /> : null}
         <nav className="nav" aria-label="Разделы родителя">
           {tabs.map((tab) => (
             <a key={tab.href} href={tab.href} className={tab.names.includes(name) ? 'active' : undefined} aria-current={tab.names.includes(name) ? 'page' : undefined}>

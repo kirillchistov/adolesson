@@ -50,6 +50,10 @@ export function Me() {
           <Field label="Моя фраза для просьбы о помощи" value={card.phrase} onChange={(phrase) => edit({ phrase })} onBlur={() => keep({ phrase: card.phrase })} />
         </>
       ) : null}
+      <a className="choice" href="#/teen/map">
+        <strong>Где ломается</strong>
+        <span>Десять карточек. Баллы остаются здесь, на стол — только фраза, если сама её положишь</span>
+      </a>
       <a className="choice" href="#/teen/table">
         <strong>Общий стол</strong>
         <span>{session ? `${session.family.name}: договорённость, цвет, просьбы` : 'Войти или открыть приглашение'}</span>

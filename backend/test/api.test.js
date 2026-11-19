@@ -405,3 +405,88 @@ test('приглашение показывается до входа, заня�
   assert.equal(expired.statusCode, 404);
   await app.close();
 });
+
+test('на стол попадает только выбранная фраза, не карта', async () => {
+  const app = await build();
+  const parent = await createFamily(app, 'parent-notes-table', 'Стол фраз');
+  const teen = await acceptInvite(app, parent.cookies, 'teen', 'teen-notes-table');
+  const other = await createFamily(app, 'parent-notes-other');
+
+  const published = await app.inject({
+    method: 'PUT',
+    url: '/api/table-notes/me',
+    cookies: teen.cookies,
+    payload: {
+      kind: 'barrier',
+      text: 'Точка трения — начать.',
+      scores: { start: 4 },
+    },
+  });
+  assert.equal(published.statusCode, 200);
+  assert.deepEqual(Object.keys(published.json()).sort(), ['at', 'authorId', 'id', 'kind', 'text']);
+  assert.equal(published.json().text, 'Точка трения — начать.');
+  assert.equal(published.json().scores, undefined);
+
+  const parentSees = await app.inject({
+    method: 'GET',
+    url: '/api/table-notes',
+    cookies: parent.cookies,
+  });
+  assert.equal(parentSees.statusCode, 200);
+  assert.equal(parentSees.json().length, 1);
+  assert.equal(parentSees.json()[0].text, 'Точка трения — начать.');
+
+  const parentBarrier = await app.inject({
+    method: 'PUT',
+    url: '/api/table-notes/me',
+    cookies: parent.cookies,
+    payload: { kind: 'barrier', text: 'Я перепишу её карту' },
+  });
+  assert.equal(parentBarrier.statusCode, 403);
+
+  const teenSeen = await app.inject({
+    method: 'PUT',
+    url: '/api/table-notes/me',
+    cookies: teen.cookies,
+    payload: { kind: 'seen', text: 'Чужая роль' },
+  });
+  assert.equal(teenSeen.statusCode, 403);
+
+  const seen = await app.inject({
+    method: 'PUT',
+    url: '/api/table-notes/me',
+    cookies: parent.cookies,
+    payload: { kind: 'seen', text: 'Остановка — понять.' },
+  });
+  assert.equal(seen.statusCode, 200);
+
+  const teenSees = await app.inject({
+    method: 'GET',
+    url: '/api/table-notes',
+    cookies: teen.cookies,
+  });
+  assert.equal(teenSees.json().length, 2);
+
+  const foreign = await app.inject({
+    method: 'GET',
+    url: '/api/table-notes',
+    cookies: other.cookies,
+  });
+  assert.deepEqual(foreign.json(), []);
+
+  const removed = await app.inject({
+    method: 'DELETE',
+    url: '/api/table-notes/me/barrier',
+    cookies: teen.cookies,
+  });
+  assert.equal(removed.statusCode, 204);
+  const after = await app.inject({
+    method: 'GET',
+    url: '/api/table-notes',
+    cookies: parent.cookies,
+  });
+  assert.equal(after.json().length, 1);
+  assert.equal(after.json()[0].kind, 'seen');
+
+  await app.close();
+});
