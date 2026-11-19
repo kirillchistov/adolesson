@@ -9,6 +9,7 @@ import '@fontsource/pangolin/400.css'
 import { App } from './app/App'
 import './ui/styles.css'
 import './teen/teen.css'
+import './parent/parent.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
