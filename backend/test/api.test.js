@@ -65,6 +65,52 @@ async function acceptInvite(app, cookies, role, login) {
   return { cookies: cookieOf(accepted), body: accepted.json(), token };
 }
 
+test('отдельный фронт получает сессию только со своего адреса и по https', async () => {
+  await assert.rejects(
+    () => buildApp({ database: 'pglite', corsOrigins: ['https://family.example'] }),
+    /COOKIE_SECURE/,
+  );
+
+  const app = await buildApp({
+    database: 'pglite',
+    corsOrigins: ['https://family.example'],
+    cookieSecure: true,
+  });
+  const allowed = await app.inject({
+    method: 'GET',
+    url: '/api/health',
+    headers: { origin: 'https://family.example' },
+  });
+  assert.equal(allowed.headers['access-control-allow-origin'], 'https://family.example');
+  assert.equal(allowed.headers['access-control-allow-credentials'], 'true');
+
+  const denied = await app.inject({
+    method: 'GET',
+    url: '/api/health',
+    headers: { origin: 'https://evil.example' },
+  });
+  assert.equal(denied.headers['access-control-allow-origin'], undefined);
+
+  const created = await app.inject({
+    method: 'POST',
+    url: '/api/families',
+    headers: { origin: 'https://family.example' },
+    payload: {
+      name: 'Семья',
+      displayName: 'Родитель',
+      pronouns: 'neutral',
+      login: 'parent-cors',
+      secret: '1234',
+    },
+  });
+  assert.equal(created.statusCode, 201);
+  const cookie = String(created.headers['set-cookie']);
+  assert.match(cookie, /Secure/i);
+  assert.match(cookie, /SameSite=None/i);
+  assert.match(cookie, /HttpOnly/i);
+  await app.close();
+});
+
 test('здоровье сервера не требует входа', async () => {
   const app = await build();
   const response = await app.inject({ method: 'GET', url: '/api/health' });

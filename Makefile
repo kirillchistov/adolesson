@@ -3,7 +3,7 @@
 # Прототип — prototype/. Контракт — package.json в корне. API — backend/.
 PROTO := prototype
 
-.PHONY: help install dev lint build preview clean spec db api api-test
+.PHONY: help install dev lint build preview clean spec db api api-test api-image
 
 help:
 	@echo "Прототип — в $(PROTO)/. Контракт — npm-пакет в корне. API — в backend/."
@@ -17,6 +17,7 @@ help:
 	@echo "make db        поднять локальный PostgreSQL"
 	@echo "make api       API общего стола, http://127.0.0.1:5001/"
 	@echo "make api-test  тесты доступа к общему столу"
+	@echo "make api-image образ API для Yandex Cloud"
 	@echo "make -C frontend dev   каркас «Моё», http://127.0.0.1:5174/"
 
 install:
@@ -48,3 +49,6 @@ api:
 
 api-test:
 	npm test --prefix backend
+
+api-image:
+	docker build -f backend/Dockerfile -t adolesson-api .

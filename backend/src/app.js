@@ -1,5 +1,6 @@
 import Fastify from 'fastify';
 import cookie from '@fastify/cookie';
+import cors from '@fastify/cors';
 import addFormats from 'ajv-formats';
 import { componentSchemas, ref } from './contract.js';
 import { openDatabase } from './db.js';
@@ -20,12 +21,36 @@ function unauthorized(reply) {
 }
 
 /**
- * @param {{ logger?: boolean | object, database?: string }} [options]
+ * @param {{
+ *   logger?: boolean | object,
+ *   database?: string,
+ *   corsOrigins?: string[],
+ *   cookieSecure?: boolean,
+ * }} [options]
  * database: `pglite` или строка подключения. По умолчанию DATABASE_URL.
+ * corsOrigins: адреса статического фронта, если он на другом сайте.
+ * cookieSecure: cookie только по HTTPS. Обязательно, если задан corsOrigins.
  */
-export async function buildApp({ logger = false, database } = {}) {
+export async function buildApp({
+  logger = false,
+  database,
+  corsOrigins = [],
+  cookieSecure = false,
+} = {}) {
+  if (corsOrigins.length > 0 && !cookieSecure) {
+    throw new Error('CORS_ORIGIN требует COOKIE_SECURE=1: иначе браузер не сохранит сессию');
+  }
+
+  const cookieOptions = {
+    path: '/',
+    httpOnly: true,
+    secure: cookieSecure,
+    sameSite: cookieSecure && corsOrigins.length > 0 ? 'none' : 'lax',
+  };
+
   const app = Fastify({
     logger,
+    trustProxy: cookieSecure,
     ajv: {
       customOptions: {
         removeAdditional: true,
@@ -36,6 +61,14 @@ export async function buildApp({ logger = false, database } = {}) {
   });
 
   await app.register(cookie);
+  if (corsOrigins.length > 0) {
+    await app.register(cors, {
+      credentials: true,
+      origin(origin, callback) {
+        callback(null, Boolean(origin && corsOrigins.includes(origin)));
+      },
+    });
+  }
 
   const db = await openDatabase(database);
   const store = createStore(db);
@@ -73,7 +106,14 @@ export async function buildApp({ logger = false, database } = {}) {
     notFound(reply, 'Маршрут не найден');
   });
 
-  app.get('/api/health', async () => ({ status: 'ok' }));
+  app.get('/api/health', async (request, reply) => {
+    try {
+      await db.query('SELECT 1');
+    } catch {
+      return reply.code(503).send({ status: 'unavailable' });
+    }
+    return { status: 'ok' };
+  });
 
   const requireMember = async (request, reply) => {
     const session = await store.sessionByToken(request.cookies[SESSION_COOKIE]);
@@ -85,15 +125,11 @@ export async function buildApp({ logger = false, database } = {}) {
   };
 
   const setSessionCookie = (reply, token) => {
-    reply.setCookie(SESSION_COOKIE, token, {
-      path: '/',
-      httpOnly: true,
-      sameSite: 'lax',
-    });
+    reply.setCookie(SESSION_COOKIE, token, cookieOptions);
   };
 
   const clearSessionCookie = (reply) => {
-    reply.clearCookie(SESSION_COOKIE, { path: '/' });
+    reply.clearCookie(SESSION_COOKIE, cookieOptions);
   };
 
   app.post('/api/families', { schema: { body: ref('FamilyCreate') } }, async (request, reply) => {

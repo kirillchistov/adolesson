@@ -7,9 +7,12 @@ import type { components, paths } from './schema';
  * Экраны общего стола ходят сюда. Чек-ины, блоки, журнал и «Моё» — нет.
  * Dev-сервер проксирует `/api` на http://127.0.0.1:5001,
  * чтобы cookie `session` оставалась на origin фронтенда.
+ * VITE_API_URL — адрес API, если статический фронт живёт на другом сайте.
  */
+const apiOrigin = import.meta.env.VITE_API_URL?.replace(/\/$/, '') ?? ''
+
 export const api = createClient<paths>({
-  baseUrl: '/',
+  baseUrl: apiOrigin || '/',
   credentials: 'include',
 });
 
