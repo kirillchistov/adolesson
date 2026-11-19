@@ -14,14 +14,10 @@ import { Thing } from './screens/Thing'
 import { Things } from './screens/Things'
 import { Zine } from './screens/Zine'
 import { go, parseHash, resolve, type Route } from './router'
-import { StoreProvider, useStore } from './state/context'
+import { useStore } from './state/context'
 
 export function MoeApp() {
-  return (
-    <StoreProvider>
-      <Root />
-    </StoreProvider>
-  )
+  return <Root />
 }
 
 function Root() {
