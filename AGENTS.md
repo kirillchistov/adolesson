@@ -11,10 +11,9 @@
 ## Состояние проекта
 
 В репозитории документы, кликабельный прототип этапа 0 в `prototype/`, каркас
-`frontend/` и TypeSpec-контракт общего стола в `spec/`. Сервера ещё нет:
-он появляется по [дорожной карте](docs/project-roadmap.md).
-Проверки backend и e2e вступают в силу вместе с этим кодом; до этого их
-не нужно имитировать заглушками.
+`frontend/`, TypeSpec-контракт общего стола в `spec/` и локальный API в `backend/`.
+Облака ещё нет: выкладка — по [дорожной карте](docs/project-roadmap.md).
+Проверки e2e вступают в силу вместе с этим кодом; до этого их не нужно имитировать заглушками.
 
 ## Подход: Design First
 
@@ -114,6 +113,16 @@ make install && make dev   # прототип на http://127.0.0.1:5173
 ```bash
 cd frontend && npm install && npm run dev   # UI на http://127.0.0.1:5174
 ```
+
+API общего стола. PostgreSQL из корня, сервер из `backend/`:
+
+```bash
+make db                                 # PostgreSQL на localhost:5432
+cd backend && cp .env.example .env && npm install && npm run dev   # http://127.0.0.1:5001
+cd backend && npm test                  # доступ к семье и отказ личному слою
+```
+
+Тесты API поднимают PostgreSQL в процессе и не требуют Docker. Dev-сервер фронтенда проксирует `/api` на порт 5001. Экраны к API ещё не подключены.
 
 ## Проверки перед коммитом
 

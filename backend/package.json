@@ -1,0 +1,22 @@
+{
+  "name": "adolesson-backend",
+  "private": true,
+  "version": "0.1.0",
+  "description": "API общего стола по контракту docs/api/openapi.yaml",
+  "type": "module",
+  "scripts": {
+    "start": "node --env-file-if-exists=.env src/index.js",
+    "dev": "node --watch --env-file-if-exists=.env src/index.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@fastify/cookie": "^11.0.2",
+    "ajv-formats": "^3.0.1",
+    "fastify": "^5.6.1",
+    "js-yaml": "^4.1.0",
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.3.14"
+  }
+}

@@ -28,6 +28,8 @@ make dev       # http://127.0.0.1:5173/
 
 Контракт общего стола — TypeSpec в `spec/`. Из корня: `npm install && npm run spec:build` (или `make spec`). Собранный файл `docs/api/openapi.yaml` руками не правят. Типы клиента: `cd frontend && npm run api:types`.
 
+Локальный API — в [backend/](backend/). `make db` поднимает PostgreSQL, затем `cd backend && cp .env.example .env && npm install && npm run dev` (http://127.0.0.1:5001). Проверки доступа: `cd backend && npm test`.
+
 ## GitHub Pages
 
 Сайт статический, адреса относительные, экраны открываются через `#`. После выкладки страница доступна по ссылке:

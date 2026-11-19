@@ -1,0 +1,15 @@
+# Локальный PostgreSQL для API общего стола. Пароль только для этой машины.
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: adolesson
+      POSTGRES_PASSWORD: adolesson
+      POSTGRES_DB: adolesson
+    ports:
+      - "5432:5432"
+    volumes:
+      - adolesson-pg:/var/lib/postgresql/data
+
+volumes:
+  adolesson-pg:

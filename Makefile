@@ -1,19 +1,22 @@
 .DEFAULT_GOAL := help
 
-# package.json лежит в prototype/, не в корне репозитория.
+# Прототип — prototype/. Контракт — package.json в корне. API — backend/.
 PROTO := prototype
 
-.PHONY: help install dev lint build preview clean spec
+.PHONY: help install dev lint build preview clean spec db api api-test
 
 help:
-	@echo "Прототип — в $(PROTO)/. Контракт общего стола — npm-пакет в корне."
+	@echo "Прототип — в $(PROTO)/. Контракт — npm-пакет в корне. API — в backend/."
 	@echo "make install   поставить зависимости прототипа"
-	@echo "make dev       локальный сервер, в том числе по сети"
+	@echo "make dev       локальный сервер прототипа, в том числе по сети"
 	@echo "make lint      oxlint"
 	@echo "make build     проверка типов и сборка в $(PROTO)/dist/"
 	@echo "make preview   собрать и открыть dist/"
 	@echo "make clean     удалить $(PROTO)/dist/"
 	@echo "make spec      пересобрать docs/api/openapi.yaml из spec/"
+	@echo "make db        поднять локальный PostgreSQL"
+	@echo "make api       API общего стола, http://127.0.0.1:5001/"
+	@echo "make api-test  тесты доступа к общему столу"
 	@echo "make -C frontend dev   каркас «Моё», http://127.0.0.1:5174/"
 
 install:
@@ -36,3 +39,12 @@ clean:
 
 spec:
 	npm run spec:build
+
+db:
+	docker compose up -d postgres
+
+api:
+	npm run dev --prefix backend
+
+api-test:
+	npm test --prefix backend

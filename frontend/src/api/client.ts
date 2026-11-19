@@ -5,7 +5,7 @@ import type { components, paths } from './schema';
  * Единственная точка обращения к API общего стола.
  * Пути и типы — из `src/api/schema.d.ts` (`npm run api:types`).
  * Экраны клиент пока не вызывают: личный слой подростка сюда не передаётся.
- * Когда появится сервер, dev-сервер проксирует `/api` на http://localhost:5001,
+ * Dev-сервер проксирует `/api` на http://127.0.0.1:5001,
  * чтобы cookie `session` оставалась на origin фронтенда.
  */
 export const api = createClient<paths>({
