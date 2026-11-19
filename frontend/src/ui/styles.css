@@ -208,7 +208,7 @@ html[data-theme='lunar'] .moon {
 
 .mark { width: 28px; height: 28px; fill: var(--accent); }
 
-.logo, .portrait {
+.logo, .avatar {
   display: block;
   object-fit: cover;
   border: 2.5px solid var(--line);
@@ -223,19 +223,42 @@ html[data-theme='lunar'] .moon {
   border-radius: 10px;
 }
 
-.portrait {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  object-position: center 2%;
+.avatar {
+  width: 76px;
+  height: 76px;
+  border-radius: 22%;
 }
 
-.face-lg.portrait { width: 104px; height: 104px; }
-.face-lg.logo { width: 88px; height: 88px; border-radius: 20px; }
-.face-md.portrait { width: 76px; height: 76px; }
-.face-md.logo { width: 68px; height: 68px; border-radius: 16px; }
-.face-card { width: 58px; height: 58px; }
-.logo.face-card { border-radius: 14px; }
+.avatar.face-lg { width: 104px; height: 104px; }
+.avatar.face-md { width: 76px; height: 76px; }
+.avatar.face-card { width: 58px; height: 58px; }
+
+.avatar-picks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.avatar-pick {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 22%;
+}
+
+.avatar-pick.on .avatar {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.avatar-own {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+}
 
 .face-row {
   display: flex;

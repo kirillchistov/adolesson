@@ -2,21 +2,24 @@ import type { InterestId } from '../moe/state/types'
 import type { Color } from '../db'
 import type { SourceCode } from './sources'
 
-export const colors: { id: Color; label: string; teen: string }[] = [
+export const colors: { id: Color; label: string; teen: string; parent: string }[] = [
   {
     id: 'green',
     label: 'Норм',
     teen: 'Обычный согласованный объём. Перерывы — по плану, остановиться — тоже по плану.',
+    parent: 'Обычный объём. Не добавлять сверх договорённости после удачного дня.',
   },
   {
     id: 'yellow',
     label: 'Тяжеловато',
     teen: 'Минимальный объём. Одна главная задача — и хватит.',
+    parent: 'Одна главная задача, без дополнительной проверки и напоминаний.',
   },
   {
     id: 'red',
     label: 'Совсем нет сил',
     teen: 'Сегодня не про учёбу. Сначала восстановиться.',
+    parent: 'Сначала безопасность и отдых, без выяснения отношений. Возврат к учёбе — позже, по договорённости.',
   },
 ]
 

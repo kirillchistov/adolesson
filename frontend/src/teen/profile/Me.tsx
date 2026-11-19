@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { allowedToSay } from '../content/teen'
+import { useSession } from '../../api/session'
 import { crisisDraft, crisisLead, crisisLines, crisisSources, messageToAdult } from '../content/crisis'
 import { readCard, saveCard, type CardRecord } from '../db'
 import { useStore } from '../moe/state/context'
@@ -7,6 +8,7 @@ import { Field, Screen, Sources } from '../ui'
 
 export function Me() {
   const { state, update } = useStore()
+  const { session } = useSession()
   const [card, setCard] = useState<CardRecord | null>(null)
 
   useEffect(() => {
@@ -48,6 +50,10 @@ export function Me() {
           <Field label="Моя фраза для просьбы о помощи" value={card.phrase} onChange={(phrase) => edit({ phrase })} onBlur={() => keep({ phrase: card.phrase })} />
         </>
       ) : null}
+      <a className="choice" href="#/teen/table">
+        <strong>Общий стол</strong>
+        <span>{session ? `${session.family.name}: договорённость, цвет, просьбы` : 'Войти или открыть приглашение'}</span>
+      </a>
       <a className="choice" href="#/teen/moe/now">
         <strong>Моё</strong>
         <span>Затеи, истории и мантры — отдельно от учёбы</span>

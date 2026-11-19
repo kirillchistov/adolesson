@@ -4,6 +4,7 @@ import {
   SLOT_IDS,
   type AppState,
   type AttitudeId,
+  type AvatarUpload,
   type AttitudeState,
   type FeedbackNote,
   type InterestId,
@@ -45,6 +46,8 @@ export function createDefaultState(): AppState {
     openSlots: SLOT_IDS.map((id) => ({ id, customTitle: '', note: '' })),
     items: [],
     feedback: [],
+    avatarId: 'logo',
+    avatarUploads: [],
   }
 }
 
@@ -158,6 +161,8 @@ export function normalize(input: unknown): AppState {
     ? raw.items.map(normalizeItem).filter((item): item is Item => item !== null).slice(0, 200)
     : []
 
+  const avatarUploads = normalizeUploads(raw.avatarUploads)
+
   const feedback = Array.isArray(raw.feedback)
     ? raw.feedback
         .map((entry): FeedbackNote | null => {
@@ -187,7 +192,37 @@ export function normalize(input: unknown): AppState {
     openSlots,
     items,
     feedback,
+    avatarId: normalizeAvatarId(raw.avatarId, avatarUploads),
+    avatarUploads,
   }
+}
+
+function normalizeUploads(value: unknown): AvatarUpload[] {
+  if (!Array.isArray(value)) return []
+  return value
+    .map((entry): AvatarUpload | null => {
+      if (!entry || typeof entry !== 'object') return null
+      const raw = entry as Record<string, unknown>
+      const id = asString(raw.id, 80).trim()
+      const name = asString(raw.name, 80).trim()
+      const dataUrl = asString(raw.dataUrl, 500_000)
+      if (!id || !name || !dataUrl.startsWith('data:image/jpeg;base64,')) return null
+      return { id, name, dataUrl }
+    })
+    .filter((item): item is AvatarUpload => item !== null)
+    .slice(0, 8)
+}
+
+function normalizeAvatarId(value: unknown, uploads: AvatarUpload[]): string {
+  if (value === 'logo' || typeof value !== 'string') return 'logo'
+  if (value.startsWith('userpic:')) {
+    const name = value.slice('userpic:'.length)
+    if (name.length > 0 && name.length <= 80 && !name.includes('/') && !name.includes('\\') && !name.includes('..')) {
+      return value
+    }
+  }
+  if (uploads.some((item) => item.id === value)) return value
+  return 'logo'
 }
 
 export function load(): AppState {

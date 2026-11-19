@@ -4,7 +4,7 @@ import { orderActions, storyById, type StoryAction, type StoryPanel } from '../c
 import { attemptTitle, makeAttempt } from '../state/attempt'
 import { useStore } from '../state/context'
 import { useKeep } from '../state/keep'
-import { Logo, Portrait, TimeNote, TopBar, cx, uid } from '../../../ui/ui'
+import { Face, TimeNote, TopBar, cx, uid } from '../../../ui/ui'
 
 export function Story({ id }: { id: string }) {
   const { state } = useStore()
@@ -96,7 +96,7 @@ export function Story({ id }: { id: string }) {
       >
         {onActions ? (
           <>
-            <Logo className="face-md" />
+            <Face className="face-md" />
             <Actions
               storyId={story.id}
               actions={actions}
@@ -106,7 +106,7 @@ export function Story({ id }: { id: string }) {
           </>
         ) : (
           <>
-            {index === 0 ? <Portrait className="face-md" /> : null}
+            {index === 0 ? <Face className="face-md" /> : null}
             <Panel panel={story.panels[index]} />
             {index === 0 && lead ? (
               <div className="stack">

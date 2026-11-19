@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { Table } from '../shared/Table'
 import { Pause } from './pause/Pause'
 import { Phrases } from './phrases/Phrases'
 import { Talk } from './talk/Talk'
@@ -6,13 +7,14 @@ import { Week } from './week/Week'
 
 const tabs = [
   { href: '#/parent/week', label: 'Неделя', names: ['week', 'talk'] },
+  { href: '#/parent/table', label: 'Стол', names: ['table'] },
   { href: '#/parent/phrases', label: 'Фразы', names: ['phrases'] },
   { href: '#/parent/pause', label: 'Пауза', names: ['pause'] },
 ]
 
 export function ParentApp({ path }: { path: string }) {
   const name = path.replace(/^\/parent\/?/, '').split('?')[0] || 'week'
-  const known = ['week', 'talk', 'pause', 'phrases'].includes(name)
+  const known = ['week', 'talk', 'pause', 'phrases', 'table'].includes(name)
 
   useEffect(() => {
     if (!known) location.replace('#/parent/week')
@@ -28,7 +30,8 @@ export function ParentApp({ path }: { path: string }) {
         {name === 'talk' ? <Talk /> : null}
         {name === 'pause' ? <Pause /> : null}
         {name === 'phrases' ? <Phrases /> : null}
-        <nav className="nav cols-3" aria-label="Разделы родителя">
+        {name === 'table' ? <Table allowCreate /> : null}
+        <nav className="nav" aria-label="Разделы родителя">
           {tabs.map((tab) => (
             <a key={tab.href} href={tab.href} className={tab.names.includes(name) ? 'active' : undefined} aria-current={tab.names.includes(name) ? 'page' : undefined}>
               {tab.label}

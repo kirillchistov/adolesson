@@ -3,7 +3,7 @@ import { attitudes } from '../content/attitudes'
 import { go } from '../router'
 import { useStore } from '../state/context'
 import type { Reaction } from '../state/types'
-import { cx, Logo, Portrait, ThemeSwitch } from '../../../ui/ui'
+import { Face, Logo, ThemeSwitch, cx } from '../../../ui/ui'
 
 const reactions: { id: Reaction; label: string }[] = [
   { id: 'resonates', label: 'Откликается' },
@@ -92,10 +92,7 @@ export function Splash() {
         <p className="kicker">
           {index + 1} / {attitudes.length}
         </p>
-        <div className="face-row">
-          <Portrait className="face-lg" />
-          <Logo className="face-md" />
-        </div>
+        <Face className="face-lg" />
         <p className="source">{attitude.source}</p>
         <h1>
           <span className="headline">{title}</span>

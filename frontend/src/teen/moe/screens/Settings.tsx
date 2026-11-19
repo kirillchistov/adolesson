@@ -6,6 +6,7 @@ import { useStore } from '../state/context'
 import { createDefaultState, downloadBackup, parseBackup } from '../state/storage'
 import type { AppState, InterestId } from '../state/types'
 import { Dialog, Field, SaveWarning, ThemeSwitch, TopBar, formatWhen, uid } from '../../../ui/ui'
+import { AvatarPicker } from '../AvatarPicker'
 
 export function Settings() {
   const { state, update, replaceAll } = useStore()
@@ -67,6 +68,8 @@ export function Settings() {
           Между устройствами их можно перенести только файлом выгрузки.
         </p>
       </article>
+
+      <AvatarPicker />
 
       <section className="stack">
         <h2>Вид</h2>
@@ -252,7 +255,7 @@ export function Settings() {
       {confirmWipe ? (
         <Dialog
           title="Удалить всё из этого браузера?"
-          text="Названия, затеи, записки и выбранный вид исчезнут."
+          text="Названия, затеи, записки, аватар и выбранный вид исчезнут."
           confirm="Удалить"
           danger
           onConfirm={() => {

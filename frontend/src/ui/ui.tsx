@@ -1,6 +1,6 @@
 import { useEffect, useId, type ReactNode, type TextareaHTMLAttributes } from 'react'
 import logoUrl from '../../assets/mhlogo.png'
-import portraitUrl from '../../assets/sailor-photo.jpg'
+import { avatarSrc } from '../teen/moe/avatar'
 import { useStore } from '../teen/moe/state/context'
 import type { TimeChoice } from '../teen/moe/state/types'
 
@@ -31,8 +31,9 @@ export function Logo({ className }: { className?: string }) {
   return <img className={cx('logo', className)} src={logoUrl} alt="" />
 }
 
-export function Portrait({ className }: { className?: string }) {
-  return <img className={cx('portrait', className)} src={portraitUrl} alt="" />
+export function Face({ className }: { className?: string }) {
+  const { state } = useStore()
+  return <img className={cx('avatar', className)} src={avatarSrc(state)} alt="" />
 }
 
 export function ThemeSwitch() {

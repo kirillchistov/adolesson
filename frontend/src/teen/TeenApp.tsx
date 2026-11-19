@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { Table } from '../shared/Table'
 import { Breathe } from './practices/Breathe'
 import { Help } from './help/Help'
 import { Now, Rest } from './now/Now'
@@ -16,7 +17,7 @@ export function TeenApp({ path }: { path: string }) {
   const [pathname, query = ''] = path.split('?')
   const name = pathname.replace(/^\/teen\/?/, '') || 'now'
   const minimum = new URLSearchParams(query).get('min') === '1'
-  const known = ['now', 'rest', 'start', 'help', 'breathe', 'me', 'sos'].includes(name)
+  const known = ['now', 'rest', 'start', 'help', 'breathe', 'me', 'sos', 'table'].includes(name)
 
   useEffect(() => {
     if (!known) location.replace('#/teen/now')
@@ -35,6 +36,7 @@ export function TeenApp({ path }: { path: string }) {
         {name === 'breathe' ? <Breathe /> : null}
         {name === 'me' ? <Me /> : null}
         {name === 'sos' ? <Sos /> : null}
+        {name === 'table' ? <Table allowCreate={false} back="#/teen/now" /> : null}
         <nav className="nav" aria-label="Разделы">
           {tabs.map((tab) => (
             <a key={tab.href} href={tab.href} className={tab.names.includes(name) ? 'active' : undefined} aria-current={tab.names.includes(name) ? 'page' : undefined}>

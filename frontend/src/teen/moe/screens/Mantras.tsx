@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { attitudes } from '../content/attitudes'
 import { useStore } from '../state/context'
-import { Logo, Portrait, TopBar, cx } from '../../../ui/ui'
+import { Face, TopBar, cx } from '../../../ui/ui'
 
 export function Mantras({ onClose }: { onClose?: () => void }) {
   const { state } = useStore()
@@ -57,10 +57,7 @@ export function Mantras({ onClose }: { onClose?: () => void }) {
           show(index + 1 === attitudes.length ? 0 : index + 1)
         }}
       >
-        <div className="face-row">
-          <Portrait className="face-md" />
-          <Logo className="face-md" />
-        </div>
+        <Face className="face-md" />
         <p className="kicker">
           {index + 1} / {attitudes.length}
         </p>

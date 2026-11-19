@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { api } from '../../api/client'
+import { useSession } from '../../api/session'
 import { useStore } from '../moe/state/context'
 import { colors, recoveryOptions } from '../content/teen'
 import { isToday, readCheckIns, saveCheckIn, type CheckIn, type Color } from '../db'
@@ -7,11 +9,15 @@ import { Screen, Sources } from '../ui'
 
 export function Now() {
   const { state } = useStore()
+  const { session } = useSession()
   const [checkIns, reload, ready] = useAsync(readCheckIns, [] as CheckIn[])
   const today = checkIns.find((item) => isToday(item.at))
   const [color, setColor] = useState<Color | null>(null)
   const [words, setWords] = useState('')
   const [filled, setFilled] = useState(false)
+  const [shareOpen, setShareOpen] = useState(false)
+  const [shared, setShared] = useState(false)
+  const [minimum, setMinimum] = useState('')
 
   useEffect(() => {
     if (!ready || filled) return
@@ -27,6 +33,26 @@ export function Now() {
     if (next === 'red') location.hash = '#/teen/rest'
   }
 
+  useEffect(() => {
+    if (!session) return
+    let live = true
+    api.GET('/api/agreements/current').then((result) => {
+      if (live && result.data?.minOnHardDay) setMinimum(result.data.minOnHardDay)
+    })
+    return () => {
+      live = false
+    }
+  }, [session])
+
+  async function publishColor() {
+    if (!color) return
+    const result = await api.PUT('/api/signals/me', { body: { color } })
+    if (result.response.ok) {
+      setShared(true)
+      setShareOpen(false)
+    }
+  }
+
   async function keepWords() {
     if (!color) return
     await saveCheckIn(color, words)
@@ -37,7 +63,11 @@ export function Now() {
 
   return (
     <Screen kicker="Сейчас" title="Как ты?">
-      <p className="meaning">Без оценок. Это видишь только ты: семьи ещё нет, цвет никуда не отправляется.</p>
+      <p className="meaning">
+        {session
+          ? 'Без оценок. Слова остаются на этом устройстве. На стол можно показать только цвет.'
+          : 'Без оценок. Это видишь только ты: семьи ещё нет, цвет никуда не отправляется.'}
+      </p>
       <div className="gradient-pick" role="radiogroup" aria-label="Состояние">
         {colors.map((item) => (
           <button
@@ -72,7 +102,9 @@ export function Now() {
           ) : null}
           {meta.id === 'yellow' ? (
             <>
-              <p className="quiet">Минимальный объём ещё не договорён — его можно будет выбрать вместе, когда появится общий стол.</p>
+              <p className="quiet">
+                {minimum ? `Минимум из договорённости: ${minimum}` : 'Минимальный объём ещё не договорён — его можно выбрать вместе на общем столе.'}
+              </p>
               <a className="btn" href="#/teen/start?min=1">
                 Только минимум
               </a>
@@ -85,6 +117,26 @@ export function Now() {
             </a>
           ) : null}
         </article>
+      ) : null}
+      {session && color ? (
+        shareOpen ? (
+          <article className="panel">
+            <p className="kicker">Так цвет будет на столе</p>
+            <p>{meta?.label}. Слов из поля выше там не будет.</p>
+            <div className="row">
+              <button type="button" className="btn ghost" onClick={() => setShareOpen(false)}>
+                Оставить у себя
+              </button>
+              <button type="button" className="btn" onClick={publishColor}>
+                Показать цвет
+              </button>
+            </div>
+          </article>
+        ) : (
+          <button type="button" className="btn ghost" onClick={() => setShareOpen(true)}>
+            {shared ? 'Цвет на столе. Показать другой' : 'Посмотреть цвет перед показом'}
+          </button>
+        )
       ) : null}
       <a className="text-btn" href="#/teen/breathe">
         Подышать 1 минуту

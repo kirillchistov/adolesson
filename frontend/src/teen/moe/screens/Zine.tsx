@@ -1,6 +1,6 @@
 import { stories } from '../content/stories'
 import { useStore } from '../state/context'
-import { Logo, Portrait, SaveWarning, TopBar, cx } from '../../../ui/ui'
+import { Face, SaveWarning, TopBar, cx } from '../../../ui/ui'
 
 export function Zine({ stuck }: { stuck: boolean }) {
   const { state } = useStore()
@@ -23,7 +23,7 @@ export function Zine({ stuck }: { stuck: boolean }) {
             className={cx('catalog-card', stuck && story.id === 'references' && 'feature')}
             href={`#/teen/moe/story/${story.id}`}
           >
-            <Portrait className="face-card" />
+            <Face className="face-card" />
             <span className="card-copy">
               <span className="sticker">{story.topic}</span>
               <strong>{story.title}</strong>
@@ -35,7 +35,7 @@ export function Zine({ stuck }: { stuck: boolean }) {
           .filter((slot) => slot.customTitle.trim())
           .map((slot) => (
             <a key={slot.id} className="catalog-card empty" href={`#/teen/moe/slot/${slot.id}`}>
-              <Logo className="face-card" />
+              <Face className="face-card" />
               <span className="card-copy">
                 <span className="sticker">твоя тема</span>
                 <strong>{slot.customTitle.trim()}</strong>

@@ -2,7 +2,7 @@ import { statusLabel } from '../content/interests'
 import { keptSummary } from '../state/attempt'
 import { useStore } from '../state/context'
 import type { Item } from '../state/types'
-import { TopBar, Portrait, Logo } from '../../../ui/ui'
+import { Face, TopBar } from '../../../ui/ui'
 
 function origin(item: Item): string | null {
   if (item.source?.type === 'story') return 'из истории'
@@ -20,10 +20,7 @@ export function Things() {
       <p className="meaning">Идеи, черновики и готовое — без оценок и рейтингов.</p>
       {items.length === 0 ? (
         <article className="panel">
-          <div className="face-row">
-            <Portrait className="face-lg" />
-            <Logo className="face-md" />
-          </div>
+          <Face className="face-lg" />
           <h1>Пока здесь пусто</h1>
           <p>Сюда попадёт первая попытка: название и шаги. Сам рисунок или видео остаются у тебя.</p>
           <div className="row wrap">
@@ -39,10 +36,9 @@ export function Things() {
         <div className="catalog">
           {items.map((item) => {
             const from = origin(item)
-            const fromStory = item.source?.type === 'story'
             return (
               <a key={item.id} className="catalog-card" href={`#/teen/moe/thing/${item.id}`}>
-                {fromStory ? <Portrait className="face-card" /> : <Logo className="face-card" />}
+                <Face className="face-card" />
                 <span className="card-copy">
                   <span className="sticker">{statusLabel(item.status)}</span>
                   <strong>{item.title}</strong>

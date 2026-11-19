@@ -1,13 +1,12 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { go } from '../router'
 import { useStore } from '../state/context'
-import { Logo, Portrait, cx } from '../../../ui/ui'
+import { Face, Logo, cx } from '../../../ui/ui'
 
-const cards: { kicker: string; title: string; body: ReactNode; face: 'portrait' | 'logo' | 'both' }[] = [
+const cards: { kicker: string; title: string; body: ReactNode }[] = [
   {
     kicker: 'Что это',
     title: 'Мой курс',
-    face: 'portrait',
     body: (
       <p className="meaning">
         Место для твоих затей. Не учёба и не наставление «как тебе правильно жить». 
@@ -18,7 +17,6 @@ const cards: { kicker: string; title: string; body: ReactNode; face: 'portrait' 
   {
     kicker: 'Зачем',
     title: 'Чтобы своё было проще начать',
-    face: 'logo',
     body: (
       <p className="meaning">
         Можно найти или создать идею (затею), сделать маленький шаг ее реализовать и не потерять то, что уже получилось. 
@@ -29,7 +27,6 @@ const cards: { kicker: string; title: string; body: ReactNode; face: 'portrait' 
   {
     kicker: 'Как',
     title: 'Три шага',
-    face: 'both',
     body: (
       <ol className="steps">
         <li>На «Сейчас» выбрать, что хочется иметь к концу.</li>
@@ -109,10 +106,7 @@ export function Onboarding() {
           if (!last) show(index + 1)
         }}
       >
-        <div className="face-row">
-          {card.face !== 'logo' ? <Portrait className="face-lg" /> : null}
-          {card.face !== 'portrait' ? <Logo className="face-lg" /> : null}
-        </div>
+        <Face className="face-lg" />
         <p className="kicker">
           {card.kicker} · {index + 1} / {cards.length}
         </p>

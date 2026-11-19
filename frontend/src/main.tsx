@@ -10,6 +10,7 @@ import { App } from './app/App'
 import './ui/styles.css'
 import './teen/teen.css'
 import './parent/parent.css'
+import './shared/table.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

@@ -34,6 +34,8 @@ function Root() {
 
   useEffect(() => {
     const sync = () => {
+      const raw = location.hash.replace(/^#/, '')
+      if (raw && raw !== '/' && !raw.startsWith('/teen/moe')) return
       const parsed = parseHash(location.hash)
       if (parsed) {
         setRoute(parsed)

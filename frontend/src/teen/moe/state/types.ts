@@ -56,6 +56,12 @@ export type FeedbackNote = {
   createdAt: string
 }
 
+export type AvatarUpload = {
+  id: string
+  name: string
+  dataUrl: string
+}
+
 export type AppState = {
   seenOnboarding: boolean
   seenSplash: boolean
@@ -67,6 +73,8 @@ export type AppState = {
   openSlots: OpenSlot[]
   items: Item[]
   feedback: FeedbackNote[]
+  avatarId: string
+  avatarUploads: AvatarUpload[]
 }
 
 export const ATTITUDE_IDS: AttitudeId[] = [

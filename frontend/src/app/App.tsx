@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { SessionProvider } from '../api/session'
+import { Join } from '../shared/Join'
 import { ParentApp } from '../parent/ParentApp'
 import { MoeApp } from '../teen/moe/MoeApp'
 import { StoreProvider, useStore } from '../teen/moe/state/context'
@@ -7,7 +9,9 @@ import { TeenApp } from '../teen/TeenApp'
 export function App() {
   return (
     <StoreProvider>
-      <Shell />
+      <SessionProvider>
+        <Shell />
+      </SessionProvider>
     </StoreProvider>
   )
 }
@@ -29,11 +33,13 @@ function Shell() {
   }, [])
 
   const path = hash.replace(/^#/, '') || '/'
-  const zone = path.startsWith('/teen/moe') ? 'moe' : path.startsWith('/teen') ? 'teen' : path.startsWith('/parent') ? 'parent' : 'entry'
+  const joinToken = path.startsWith('/join/') ? decodeURIComponent(path.slice('/join/'.length).split('?')[0]) : ''
+  const zone = joinToken ? 'join' : path.startsWith('/teen/moe') ? 'moe' : path.startsWith('/teen') ? 'teen' : path.startsWith('/parent') ? 'parent' : 'entry'
   const showHelp = zone === 'teen' && !path.startsWith('/teen/help') && !path.startsWith('/teen/sos')
 
   return (
     <>
+      {zone === 'join' ? <Join token={joinToken} /> : null}
       {zone === 'moe' ? <MoeApp /> : null}
       {zone === 'teen' ? <TeenApp path={path} /> : null}
       {zone === 'parent' ? <ParentApp path={path} /> : null}

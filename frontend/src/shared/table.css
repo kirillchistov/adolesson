@@ -1,0 +1,31 @@
+.agreement {
+  margin: 0;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.agreement div {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.agreement dt {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.agreement dd {
+  margin: 0;
+}
+
+.feed-item {
+  border-left: 3px solid var(--accent);
+  padding: 0.2rem 0 0.2rem 0.75rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.inline {
+  flex: 1;
+}

@@ -35,9 +35,9 @@ export function Week() {
           <strong>Перед разговором</strong>
           <span>Проверить себя за минуту</span>
         </a>
-        <a className="choice" href="#/parent/phrases">
-          <strong>Фразы и наблюдение</strong>
-          <span>Замена привычных слов и запись факта</span>
+        <a className="choice" href="#/parent/table">
+          <strong>Общий стол</strong>
+          <span>Договорённость, цвет дня, просьбы</span>
         </a>
       </div>
       <button type="button" className="text-btn" onClick={() => setOpen((value) => !value)} aria-expanded={open}>
