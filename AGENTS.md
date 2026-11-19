@@ -124,7 +124,7 @@ cd backend && npm test                  # доступ к семье и отка
 
 Тесты API поднимают PostgreSQL в процессе и не требуют Docker. Dev-сервер фронтенда проксирует `/api` на порт 5001. Общий стол (`#/parent/table`, `#/teen/table`, `#/join/{token}`) ходит в этот API. Чек-ины, журнал, блоки и «Моё» на сервер не отправляются.
 
-Образ API для Yandex Cloud: `make api-image`. В окружении сервиса — `DATABASE_URL` с `sslmode=require`, `COOKIE_SECURE=1`. Если статический фронт на другом адресе, ещё `CORS_ORIGIN` и при сборке фронта `VITE_API_URL`. Кластер Managed PostgreSQL в репозитории не создаётся.
+Образ API для Yandex Cloud: `make api-image`. Порядок выкладки, общая платформа и отдельные базы приложений — в [docs/cloud-deploy-ru.md](docs/cloud-deploy-ru.md). В окружении сервиса — `DATABASE_URL` и `COOKIE_SECURE=1`. Если статический фронт на другом адресе, ещё `CORS_ORIGIN` и при сборке фронта `VITE_API_URL`. Кластер Managed PostgreSQL в репозитории не создаётся.
 
 ## Проверки перед коммитом
 
