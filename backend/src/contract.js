@@ -2,15 +2,23 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { load as loadYaml } from 'js-yaml';
+import { repoPath } from './files.js';
 
 /**
  * Схемы валидации берутся из docs/api/openapi.yaml (источник — spec/*.tsp).
+ * Сборка сервиса backend на Vercel копирует его в backend/openapi.yaml:
+ * корень сервиса — backend/, файла docs/ рядом с функцией может не быть.
  */
 
-const contractPath = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  '../../docs/api/openapi.yaml',
-);
+const here = path.dirname(fileURLToPath(import.meta.url));
+const contractPath = [
+  repoPath('docs', 'api', 'openapi.yaml'),
+  path.resolve(here, '../openapi.yaml'),
+].find((candidate) => fs.existsSync(candidate));
+
+if (!contractPath) {
+  throw new Error('Не найден docs/api/openapi.yaml. Сборка сервиса копирует его в backend/openapi.yaml.');
+}
 
 const contract = loadYaml(fs.readFileSync(contractPath, 'utf8'));
 

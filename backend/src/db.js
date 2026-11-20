@@ -2,8 +2,18 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import pg from 'pg';
+import { repoPath } from './files.js';
+import { resolvePgConfig } from './pg-config.js';
 
-const migrationsDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../migrations');
+const here = path.dirname(fileURLToPath(import.meta.url));
+const migrationsDir = [
+  path.resolve(here, '../migrations'),
+  repoPath('backend', 'migrations'),
+].find((dir) => fs.existsSync(dir));
+
+if (!migrationsDir) {
+  throw new Error('Не найден каталог backend/migrations');
+}
 
 function migrationFiles() {
   return fs
@@ -59,8 +69,33 @@ async function openPglite() {
   return db;
 }
 
+async function isolateSchema(pool, schema) {
+  const client = await pool.connect();
+  try {
+    await client.query(`CREATE SCHEMA IF NOT EXISTS ${schema}`);
+    await client.query(`REVOKE ALL ON SCHEMA ${schema} FROM PUBLIC`);
+    await client.query(`
+      DO $body$
+      BEGIN
+        IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN
+          EXECUTE 'REVOKE ALL ON SCHEMA ${schema} FROM anon, authenticated';
+        END IF;
+      END
+      $body$
+    `);
+    await client.query(`SET search_path TO ${schema}`);
+  } finally {
+    client.release();
+  }
+}
+
 async function openPostgres(connectionString) {
-  const pool = new pg.Pool({ connectionString });
+  const resolved = resolvePgConfig(connectionString);
+  const pool = new pg.Pool(resolved.pool);
+  pool.on('error', (error) => {
+    console.error(JSON.stringify({ type: 'db_error', reason: 'pool', code: error.code ?? null }));
+  });
+  if (resolved.schema) await isolateSchema(pool, resolved.schema);
   const query = wrapQuery((sql, params) => pool.query(sql, params));
   const db = {
     query,

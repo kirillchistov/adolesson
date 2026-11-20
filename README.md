@@ -11,7 +11,8 @@
 - [Черновой план поддержки](docs/support-concept.md) — содержательная основа: маршрут, чек-листы, практики.
 - [Источники](docs/sources.md) — проверенные ссылки (UNICEF, ВОЗ, NICE, исследования).
 - [Дорожная карта](docs/project-roadmap.md) — порядок сборки и критерии выхода из этапов.
-- [Выкладка в Yandex Cloud](docs/cloud-deploy-ru.md) — общий кластер PostgreSQL, отдельная база на приложение, API и фронт семьи.
+- [Выкладка пилота](docs/cloud-deploy.md) — Vercel и существующий Supabase, схема `adolesson`.
+- [Выкладка в Yandex Cloud](docs/cloud-deploy-ru.md) — когда на сервере появятся данные реальной семьи.
 
 ## Прототип
 

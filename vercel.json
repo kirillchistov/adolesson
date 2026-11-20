@@ -1,0 +1,44 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "regions": ["fra1"],
+  "services": {
+    "backend": {
+      "root": "backend",
+      "framework": "fastify",
+      "entrypoint": "src/index.js",
+      "buildCommand": "cp ../docs/api/openapi.yaml ./openapi.yaml",
+      "functions": {
+        "src/index.js": {
+          "maxDuration": 30,
+          "includeFiles": "{openapi.yaml,migrations/*.sql}"
+        }
+      }
+    },
+    "frontend": {
+      "root": "frontend",
+      "framework": "vite",
+      "bindings": [
+        {
+          "type": "service",
+          "service": "backend",
+          "format": "url",
+          "env": "BACKEND_URL"
+        }
+      ]
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": {
+        "service": "backend"
+      }
+    },
+    {
+      "source": "/(.*)",
+      "destination": {
+        "service": "frontend"
+      }
+    }
+  ]
+}

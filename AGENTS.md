@@ -124,7 +124,7 @@ cd backend && npm test                  # доступ к семье и отка
 
 Тесты API поднимают PostgreSQL в процессе и не требуют Docker. Dev-сервер фронтенда проксирует `/api` на порт 5001. Общий стол (`#/parent/table`, `#/teen/table`, `#/join/{token}`) ходит в этот API. Чек-ины, журнал, блоки и «Моё» на сервер не отправляются.
 
-Образ API для Yandex Cloud: `make api-image`. Порядок выкладки, общая платформа и отдельные базы приложений — в [docs/cloud-deploy-ru.md](docs/cloud-deploy-ru.md). В окружении сервиса — `DATABASE_URL` и `COOKIE_SECURE=1`. Если статический фронт на другом адресе, ещё `CORS_ORIGIN` и при сборке фронта `VITE_API_URL`. Кластер Managed PostgreSQL в репозитории не создаётся.
+Пилот: один проект Vercel, сервисы `frontend` и `backend` (`/api`). У фронта привязка `BACKEND_URL` на backend. Порядок — в [docs/cloud-deploy.md](docs/cloud-deploy.md). В окружении — `DATABASE_URL` (session pooler, порт 5432) и `COOKIE_SECURE=1`. `CORS_ORIGIN`, `VITE_API_URL` и `BACKEND_URL` не задают: браузер ходит на `/api` того же адреса, `BACKEND_URL` подставляет Vercel. Российское облако для данных реальной семьи — в [docs/cloud-deploy-ru.md](docs/cloud-deploy-ru.md). Образ `make api-image` этой выкладке не нужен.
 
 ## Проверки перед коммитом
 
